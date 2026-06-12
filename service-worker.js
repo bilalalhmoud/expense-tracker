@@ -2,7 +2,7 @@
    Strategy: cache-first for the app shell so it works fully offline.
    Bump CACHE_VERSION whenever you change cached files to force an update. */
 
-const CACHE_VERSION = 'expense-tracker-v1';
+const CACHE_VERSION = 'expense-tracker-v2';
 const APP_SHELL = [
   './',
   './index.html',

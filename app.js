@@ -380,14 +380,19 @@ function startNewMonth() {
     toast('Switched to ' + monthLabel(nextKey));
     return;
   }
-  // carry over fixed expenses, reset to unpaid
-  const fixed = currentMonth().expenses
-    .filter(e => e.type === 'fixed')
-    .map(e => ({ ...e, id: uid(), paid: false }));
-  state.months[nextKey] = { income: currentMonth().income, expenses: fixed };
+  // Carry over expenses, reset to unpaid.
+  // Fixed expenses keep their amount; variable expenses are reset to 0
+  // so the value can be entered fresh for the new month.
+  const carried = currentMonth().expenses.map(e => ({
+    ...e,
+    id: uid(),
+    paid: false,
+    amount: e.type === 'variable' ? 0 : e.amount,
+  }));
+  state.months[nextKey] = { income: currentMonth().income, expenses: carried };
   state.currentMonth = nextKey;
   save(); render();
-  toast('Started ' + monthLabel(nextKey) + ' (fixed expenses carried over)');
+  toast('Started ' + monthLabel(nextKey) + ' (fixed + variable expenses carried over)');
 }
 
 /* ---------------------------- Backup ------------------------------ */
