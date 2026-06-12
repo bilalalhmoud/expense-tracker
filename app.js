@@ -28,7 +28,7 @@ let editingId = null;
 function defaultState() {
   const m = monthKey(new Date());
   return {
-    currency: '$',
+    currency: '£',
     theme: 'light',
     currentMonth: m,
     months: { [m]: { income: 0, expenses: [] } },
@@ -521,7 +521,7 @@ function bindEvents() {
   // Settings
   $('#newMonthBtn').addEventListener('click', startNewMonth);
   $('#currencyInput').addEventListener('input', e => {
-    state.currency = e.target.value || '$';
+    state.currency = e.target.value || '£';
     save(); render();
   });
   $('#exportBtn').addEventListener('click', exportData);
