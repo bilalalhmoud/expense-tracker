@@ -220,6 +220,7 @@ function cssVar(name) {
 function drawBarChart(t) {
   const canvas = $('#barChart');
   const { ctx, w, h } = setupCanvas(canvas);
+  if (w <= 0) return; // canvas hidden (e.g. another tab active) — skip drawing
   ctx.clearRect(0, 0, w, h);
 
   const data = [
@@ -266,6 +267,7 @@ function drawCategoryChart(m) {
   const canvas = $('#catChart');
   const legend = $('#catLegend');
   const { ctx, w, h } = setupCanvas(canvas);
+  if (w <= 0) return; // canvas hidden (e.g. another tab active) — skip drawing
   ctx.clearRect(0, 0, w, h);
 
   const byCat = {};
