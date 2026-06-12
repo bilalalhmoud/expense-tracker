@@ -330,10 +330,19 @@ function addOrUpdateExpense(e) {
   } else {
     m.expenses.push({ id: uid(), paid: false, ...data });
     toast('Expense added');
+    // Reset filters to "All" so the newly added expense is always visible
+    resetFilters();
   }
   resetForm();
   save();
   render();
+}
+
+function resetFilters() {
+  filterPaid = 'all';
+  filterType = 'all';
+  $$('[data-filter]').forEach(c => c.classList.toggle('active', c.dataset.filter === 'all'));
+  $$('[data-typefilter]').forEach(c => c.classList.toggle('active', c.dataset.typefilter === 'all'));
 }
 
 function resetForm() {
