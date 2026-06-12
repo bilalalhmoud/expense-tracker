@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="theme-color" content="#2563eb" />
+  <meta name="description" content="Offline-first monthly expense and income tracker (PWA)." />
+  <title>Expense Tracker</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon.svg" type="image/svg+xml" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <header class="app-header">
+    <div class="header-left">
+      <h1>💰 Expense Tracker</h1>
+    </div>
+    <div class="header-right">
+      <label class="month-picker">
+        <span class="sr-only">Select month</span>
+        <select id="monthSelect" aria-label="Select month"></select>
+      </label>
+      <button id="themeToggle" class="icon-btn" title="Toggle dark mode" aria-label="Toggle dark mode">🌙</button>
+    </div>
+  </header>
+
+  <nav class="tabs" role="tablist">
+    <button class="tab active" data-tab="dashboard" role="tab">Dashboard</button>
+    <button class="tab" data-tab="expenses" role="tab">Expenses</button>
+    <button class="tab" data-tab="history" role="tab">History</button>
+    <button class="tab" data-tab="settings" role="tab">Settings</button>
+  </nav>
+
+  <main class="container">
+    <!-- ===================== DASHBOARD ===================== -->
+    <section id="dashboard" class="tab-panel active">
+      <div class="card income-card">
+        <label for="incomeInput">Monthly Income</label>
+        <div class="income-row">
+          <span class="currency-prefix" data-currency-symbol>$</span>
+          <input type="number" id="incomeInput" inputmode="decimal" min="0" step="0.01" placeholder="0.00" />
+        </div>
+      </div>
+
+      <div class="summary-grid">
+        <div class="card stat">
+          <span class="stat-label">Income</span>
+          <span class="stat-value" id="statIncome">$0.00</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Total Expenses</span>
+          <span class="stat-value expense" id="statExpenses">$0.00</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Paid</span>
+          <span class="stat-value paid-text" id="statPaid">$0.00</span>
+        </div>
+        <div class="card stat">
+          <span class="stat-label">Remaining</span>
+          <span class="stat-value" id="statBalance">$0.00</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>Income vs Expenses</h2>
+        <canvas id="barChart" height="180" aria-label="Bar chart of income versus expenses"></canvas>
+      </div>
+
+      <div class="card">
+        <h2>Expenses by Category</h2>
+        <canvas id="catChart" height="200" aria-label="Breakdown of expenses by category"></canvas>
+        <div id="catLegend" class="legend"></div>
+      </div>
+    </section>
+
+    <!-- ===================== EXPENSES ===================== -->
+    <section id="expenses" class="tab-panel">
+      <form id="expenseForm" class="card form-grid" autocomplete="off">
+        <input type="hidden" id="expenseId" />
+        <div class="field">
+          <label for="nameInput">Name</label>
+          <input type="text" id="nameInput" required placeholder="e.g. Rent" />
+        </div>
+        <div class="field">
+          <label for="amountInput">Amount</label>
+          <input type="number" id="amountInput" inputmode="decimal" min="0" step="0.01" required placeholder="0.00" />
+        </div>
+        <div class="field">
+          <label for="categoryInput">Category</label>
+          <input type="text" id="categoryInput" list="categoryList" placeholder="e.g. Housing" />
+          <datalist id="categoryList"></datalist>
+        </div>
+        <div class="field">
+          <label for="typeInput">Type</label>
+          <select id="typeInput">
+            <option value="fixed">Fixed</option>
+            <option value="variable">Variable</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="dueInput">Due date</label>
+          <input type="date" id="dueInput" />
+        </div>
+        <div class="field form-actions">
+          <button type="submit" class="btn primary" id="submitBtn">Add expense</button>
+          <button type="button" class="btn ghost" id="cancelEditBtn" hidden>Cancel</button>
+        </div>
+      </form>
+
+      <div class="filter-bar">
+        <div class="filter-group" role="group" aria-label="Filter by paid status">
+          <button class="chip active" data-filter="all">All</button>
+          <button class="chip" data-filter="paid">Paid</button>
+          <button class="chip" data-filter="unpaid">Unpaid</button>
+        </div>
+        <div class="filter-group" role="group" aria-label="Filter by type">
+          <button class="chip active" data-typefilter="all">All types</button>
+          <button class="chip" data-typefilter="fixed">Fixed</button>
+          <button class="chip" data-typefilter="variable">Variable</button>
+        </div>
+      </div>
+
+      <div class="card table-card">
+        <table class="expense-table">
+          <thead>
+            <tr>
+              <th>Paid</th>
+              <th>Name</th>
+              <th>Category</th>
+              <th>Type</th>
+              <th>Due</th>
+              <th class="num">Amount</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="expenseBody"></tbody>
+        </table>
+        <p id="emptyState" class="empty">No expenses yet. Add one above.</p>
+      </div>
+    </section>
+
+    <!-- ===================== HISTORY ===================== -->
+    <section id="history" class="tab-panel">
+      <div class="card">
+        <h2>Past Months</h2>
+        <table class="expense-table">
+          <thead>
+            <tr>
+              <th>Month</th>
+              <th class="num">Income</th>
+              <th class="num">Expenses</th>
+              <th class="num">Balance</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="historyBody"></tbody>
+        </table>
+        <p id="historyEmpty" class="empty">No history yet.</p>
+      </div>
+    </section>
+
+    <!-- ===================== SETTINGS ===================== -->
+    <section id="settings" class="tab-panel">
+      <div class="card">
+        <h2>New Month</h2>
+        <p class="muted">Create the next month. Fixed expenses are carried over (reset to unpaid). History is preserved.</p>
+        <button class="btn primary" id="newMonthBtn">Start new month</button>
+      </div>
+
+      <div class="card">
+        <h2>Currency</h2>
+        <label for="currencyInput">Symbol</label>
+        <input type="text" id="currencyInput" maxlength="3" placeholder="$" class="small-input" />
+      </div>
+
+      <div class="card">
+        <h2>Backup</h2>
+        <p class="muted">Export all data as JSON, or import a previous backup.</p>
+        <div class="btn-row">
+          <button class="btn" id="exportBtn">Export JSON</button>
+          <button class="btn" id="importBtn">Import JSON</button>
+          <input type="file" id="importFile" accept="application/json" hidden />
+        </div>
+      </div>
+
+      <div class="card danger-zone">
+        <h2>Danger Zone</h2>
+        <button class="btn danger" id="clearMonthBtn">Clear current month expenses</button>
+        <button class="btn danger" id="resetAllBtn">Delete all data</button>
+      </div>
+    </section>
+  </main>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
